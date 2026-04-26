@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ぱくぱくタイマー</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app" aria-label="ぱくぱくタイマー">
+      <div class="bunting" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <section class="stage">
+        <header class="hero">
+          <h1 aria-label="ぱくぱくタイマー">
+            <span>ぱ</span><span>く</span><span>ぱ</span><span>く</span><span>タイマー</span>
+          </h1>
+          <div class="total-time" aria-live="polite">
+            <span>ぜんたい</span>
+            <strong id="totalMinutes">20分</strong>
+          </div>
+        </header>
+
+        <div class="content">
+          <button
+            class="settings-button"
+            id="settingsButton"
+            type="button"
+            aria-label="時間を設定する"
+            aria-expanded="false"
+            aria-controls="settingsPanel"
+          >
+            <span aria-hidden="true">⚙</span>
+            <small>設定</small>
+          </button>
+
+          <section class="timer-wrap" aria-label="食事タイマー">
+            <svg class="meal-plate" viewBox="0 0 640 640" role="img" aria-labelledby="plateTitle plateDesc">
+              <title id="plateTitle">3つに分かれた食事タイマー</title>
+              <desc id="plateDesc">左がヨーグルト、真ん中が卵焼き、右がご飯です。</desc>
+              <defs>
+                <filter id="softShadow" x="-15%" y="-15%" width="130%" height="130%">
+                  <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#8e744a" flood-opacity="0.22" />
+                </filter>
+              </defs>
+              <circle cx="320" cy="320" r="292" class="plate-rim" />
+              <circle cx="320" cy="320" r="270" class="plate-paper" />
+              <g id="segments" filter="url(#softShadow)"></g>
+              <circle cx="320" cy="320" r="98" class="mascot-ring" />
+            </svg>
+
+            <div class="food-label yogurt">
+              <div class="food-icon" aria-hidden="true">🥣</div>
+              <span>ヨーグルト</span>
+              <strong id="yogurtRemaining">4分</strong>
+            </div>
+            <div class="food-label egg">
+              <div class="food-icon" aria-hidden="true">🍳</div>
+              <small>たまごや</small>
+              <span>卵焼き</span>
+              <strong id="eggRemaining">7分</strong>
+            </div>
+            <div class="food-label rice">
+              <div class="food-icon" aria-hidden="true">🍚</div>
+              <span>ごはん</span>
+              <strong id="riceRemaining">9分</strong>
+            </div>
+
+            <div class="pakupaku" id="pakupaku" aria-label="パクパクくん">
+              <div class="eye"></div>
+              <div class="cheek"></div>
+              <div class="mouth"></div>
+            </div>
+          </section>
+
+          <aside class="side-panel" aria-label="パクパクくんの動き">
+            <p>パクパクくんが<br />パクパク動くよ!</p>
+            <div class="mascot-demo open" aria-hidden="true">
+              <div class="mini-eye"></div>
+              <div class="mini-cheek"></div>
+              <div class="mini-mouth"></div>
+            </div>
+            <strong>あーん</strong>
+            <div class="arrow" aria-hidden="true">↕</div>
+            <div class="mascot-demo closed" aria-hidden="true">
+              <div class="mini-eye"></div>
+              <div class="mini-cheek"></div>
+              <div class="mini-mouth"></div>
+            </div>
+            <strong class="green">ぱくっ</strong>
+          </aside>
+
+          <button class="sound-button" id="soundButton" type="button" aria-pressed="true" aria-label="音を切り替える">
+            <span aria-hidden="true">♪</span>
+            <small>おと</small>
+          </button>
+        </div>
+
+        <section class="controls" aria-label="タイマー操作">
+          <button id="startPauseButton" type="button">スタート</button>
+          <button id="resetButton" type="button">リセット</button>
+        </section>
+
+        <section class="settings" id="settingsPanel" aria-label="時間設定" hidden>
+          <label>
+            <span>ヨーグルト</span>
+            <input id="yogurtInput" type="number" min="1" max="60" step="1" value="4" />
+            <em>分</em>
+          </label>
+          <label>
+            <span>卵焼き</span>
+            <input id="eggInput" type="number" min="1" max="60" step="1" value="7" />
+            <em>分</em>
+          </label>
+          <label>
+            <span>ごはん</span>
+            <input id="riceInput" type="number" min="1" max="60" step="1" value="9" />
+            <em>分</em>
+          </label>
+        </section>
+
+        <div class="complete-message" id="completeMessage" role="status" aria-live="polite" hidden>
+          <span>ごちそうさま!</span>
+          <strong>ぜんぶ食べたよ</strong>
+        </div>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
