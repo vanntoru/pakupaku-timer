@@ -124,8 +124,9 @@ input {
 
 h1 {
   margin: 0;
+  padding: 0.08em 0.14em 0.02em;
   font-size: clamp(44px, 6vw, 76px);
-  line-height: 1;
+  line-height: 1.12;
   letter-spacing: 0;
   font-weight: 900;
   -webkit-text-stroke: 8px #fff6df;
@@ -345,6 +346,77 @@ h1 span:nth-child(5) { color: #9d6218; }
   clip-path: polygon(0 50%, 100% 38%, 100% 62%);
 }
 
+.pakupaku.happy .eye,
+.pakupaku.happy .cheek,
+.pakupaku.happy .mouth {
+  left: 50%;
+  right: auto;
+  background: transparent;
+  clip-path: none;
+  transform: translateX(-50%);
+}
+
+.pakupaku.happy .eye {
+  top: 38px;
+  width: 76px;
+  height: 22px;
+  border: 0;
+}
+
+.pakupaku.happy .eye::before,
+.pakupaku.happy .eye::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 24px;
+  height: 18px;
+  border-bottom: 7px solid #58310d;
+  border-radius: 0 0 50% 50%;
+}
+
+.pakupaku.happy .eye::before {
+  left: 0;
+}
+
+.pakupaku.happy .eye::after {
+  right: 0;
+}
+
+.pakupaku.happy .cheek {
+  top: 67px;
+  width: 92px;
+  height: 22px;
+  opacity: 1;
+}
+
+.pakupaku.happy .cheek::before,
+.pakupaku.happy .cheek::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 24px;
+  height: 19px;
+  border-radius: 50%;
+  background: #ff9781;
+  opacity: 0.86;
+}
+
+.pakupaku.happy .cheek::before {
+  left: 0;
+}
+
+.pakupaku.happy .cheek::after {
+  right: 0;
+}
+
+.pakupaku.happy .mouth {
+  top: 70px;
+  width: 62px;
+  height: 31px;
+  border-bottom: 8px solid #7a330b;
+  border-radius: 0 0 62px 62px;
+}
+
 @keyframes bounce {
   0%, 100% { transform: translate(-50%, -50%) scale(1); }
   50% { transform: translate(-50%, -50%) scale(1.035) rotate(-2deg); }
@@ -513,6 +585,11 @@ h1 span:nth-child(5) { color: #9d6218; }
   background: linear-gradient(180deg, #fff4a6, #ffae34);
 }
 
+.controls button[aria-pressed="true"] {
+  border-color: #83c96a;
+  background: linear-gradient(180deg, #f1ffd1, #a8e66a);
+}
+
 .settings {
   position: absolute;
   z-index: 8;
@@ -556,27 +633,29 @@ h1 span:nth-child(5) { color: #9d6218; }
   position: absolute;
   z-index: 9;
   left: 50%;
-  top: 50%;
+  bottom: 82px;
   display: grid;
   justify-items: center;
-  min-width: 420px;
-  padding: 28px 46px;
+  min-width: 360px;
+  padding: 10px 30px;
   border: 6px solid #8fce66;
   border-radius: 36px;
   background: rgba(255, 253, 237, 0.98);
   box-shadow: 0 16px 34px rgba(91, 69, 34, 0.22);
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
 }
 
 .complete-message span {
   color: #f06622;
-  font-size: 54px;
+  font-size: 36px;
+  line-height: 1.08;
   font-weight: 900;
 }
 
 .complete-message strong {
   color: #5f9f3f;
-  font-size: 32px;
+  font-size: 21px;
+  line-height: 1.18;
 }
 
 .active-yogurt .food-label.yogurt,

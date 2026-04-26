@@ -3,8 +3,8 @@ const foods = [
     id: "yogurt",
     label: "ヨーグルト",
     color: "#b9a4ed",
-    startAngle: 150,
-    endAngle: 270,
+    startAngle: 240,
+    endAngle: 0,
     input: document.querySelector("#yogurtInput"),
     remaining: document.querySelector("#yogurtRemaining"),
   },
@@ -12,8 +12,8 @@ const foods = [
     id: "egg",
     label: "卵焼き",
     color: "#ffc928",
-    startAngle: 270,
-    endAngle: 30,
+    startAngle: 120,
+    endAngle: 240,
     input: document.querySelector("#eggInput"),
     remaining: document.querySelector("#eggRemaining"),
   },
@@ -21,15 +21,18 @@ const foods = [
     id: "rice",
     label: "ごはん",
     color: "#f6f0db",
-    startAngle: 30,
-    endAngle: 150,
+    startAngle: 0,
+    endAngle: 120,
     input: document.querySelector("#riceInput"),
     remaining: document.querySelector("#riceRemaining"),
   },
 ];
 
+const eatingOrder = ["rice", "egg", "yogurt"].map((id) => foods.find((food) => food.id === id));
+
 const state = {
   running: false,
+  testMode: false,
   sound: true,
   elapsed: 0,
   lastTick: 0,
@@ -43,6 +46,7 @@ const segmentsRoot = document.querySelector("#segments");
 const totalMinutes = document.querySelector("#totalMinutes");
 const startPauseButton = document.querySelector("#startPauseButton");
 const resetButton = document.querySelector("#resetButton");
+const testButton = document.querySelector("#testButton");
 const settingsButton = document.querySelector("#settingsButton");
 const settingsPanel = document.querySelector("#settingsPanel");
 const soundButton = document.querySelector("#soundButton");
@@ -110,10 +114,24 @@ function renderSegments() {
 }
 
 function getDurations() {
+  if (state.testMode) {
+    return foods.map(() => 5);
+  }
+
   return foods.map((food) => {
     const value = Number.parseInt(food.input.value, 10);
     return Number.isFinite(value) ? Math.min(60, Math.max(1, value)) * 60 : 60;
   });
+}
+
+function setTestMode(isTestMode) {
+  state.testMode = isTestMode;
+  testButton.setAttribute("aria-pressed", String(isTestMode));
+}
+
+function getDurationByFood() {
+  const durations = getDurations();
+  return new Map(foods.map((food, index) => [food.id, durations[index]]));
 }
 
 function getTotalSeconds() {
@@ -125,33 +143,37 @@ function formatMinutes(seconds) {
 }
 
 function getFoodProgress(elapsed) {
-  const durations = getDurations();
+  const durationByFood = getDurationByFood();
   let cursor = 0;
-  for (let index = 0; index < foods.length; index += 1) {
-    const duration = durations[index];
+  for (let index = 0; index < eatingOrder.length; index += 1) {
+    const food = eatingOrder[index];
+    const duration = durationByFood.get(food.id);
     const start = cursor;
     const end = cursor + duration;
     if (elapsed < end) {
       return {
         activeIndex: index,
+        activeFood: food,
         activeElapsed: Math.max(0, elapsed - start),
-        durations,
+        durationByFood,
       };
     }
     cursor = end;
   }
   return {
-    activeIndex: foods.length,
+    activeIndex: eatingOrder.length,
+    activeFood: null,
     activeElapsed: 0,
-    durations,
+    durationByFood,
   };
 }
 
 function setCompletion(isComplete) {
   completeMessage.hidden = !isComplete;
   pakupaku.classList.toggle("chomping", state.running && !isComplete);
+  pakupaku.classList.toggle("happy", isComplete);
   if (isComplete) {
-    pakupaku.classList.add("closed");
+    pakupaku.classList.remove("closed");
   }
 }
 
@@ -161,11 +183,14 @@ function updateVisuals() {
   const elapsed = Math.min(state.elapsed, total);
   const progress = getFoodProgress(elapsed);
 
-  totalMinutes.textContent = formatMinutes(total);
+  totalMinutes.textContent = formatMinutes(total - elapsed);
   stage.classList.remove("active-yogurt", "active-egg", "active-rice");
 
   foods.forEach((food, index) => {
-    const start = durations.slice(0, index).reduce((sum, seconds) => sum + seconds, 0);
+    const orderIndex = eatingOrder.findIndex((orderedFood) => orderedFood.id === food.id);
+    const start = eatingOrder
+      .slice(0, orderIndex)
+      .reduce((sum, orderedFood) => sum + durations[foods.indexOf(orderedFood)], 0);
     const foodElapsed = Math.min(Math.max(elapsed - start, 0), durations[index]);
     const remaining = durations[index] - foodElapsed;
     const ratio = durations[index] === 0 ? 1 : foodElapsed / durations[index];
@@ -179,8 +204,8 @@ function updateVisuals() {
     eaten.setAttribute("d", ratio <= 0 ? "" : sectorPath(food.startAngle, eatenAngle));
   });
 
-  if (progress.activeIndex < foods.length) {
-    stage.classList.add(`active-${foods[progress.activeIndex].id}`);
+  if (progress.activeFood) {
+    stage.classList.add(`active-${progress.activeFood.id}`);
   }
 
   setCompletion(elapsed >= total);
@@ -247,6 +272,8 @@ function startTimer() {
   }
   state.running = true;
   state.lastTick = 0;
+  state.mouthOpen = true;
+  pakupaku.classList.remove("closed", "happy");
   pakupaku.classList.add("chomping");
   requestAnimationFrame(tick);
   updateVisuals();
@@ -271,13 +298,18 @@ resetButton.addEventListener("click", () => {
   resetTimer();
 });
 
+testButton.addEventListener("click", () => {
+  setTestMode(true);
+  resetTimer();
+});
+
 function resetTimer() {
   state.running = false;
   state.elapsed = 0;
   state.lastTick = 0;
   state.mouthTimer = 0;
   state.mouthOpen = true;
-  pakupaku.classList.remove("closed", "chomping");
+  pakupaku.classList.remove("closed", "chomping", "happy");
   updateVisuals();
 }
 
@@ -294,6 +326,7 @@ soundButton.addEventListener("click", () => {
 
 foods.forEach((food) => {
   food.input.addEventListener("input", () => {
+    setTestMode(false);
     const value = Number.parseInt(food.input.value, 10);
     if (!Number.isFinite(value)) return;
     food.input.value = String(Math.min(60, Math.max(1, value)));
