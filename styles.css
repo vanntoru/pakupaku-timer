@@ -1073,6 +1073,7 @@ h1 span:nth-child(5) { color: #9d6218; }
   top: 50%;
   width: 138px;
   height: 138px;
+  overflow: hidden;
   transform: translate(-50%, -50%);
   z-index: 4;
   transition: transform 160ms ease;
