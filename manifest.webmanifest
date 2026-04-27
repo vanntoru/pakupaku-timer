@@ -1,0 +1,26 @@
+{
+  "name": "ぱくぱくタイマー",
+  "short_name": "ぱくぱく",
+  "description": "子どもが楽しく食事を進められる、iPad向けの食事タイマーです。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fff9e9",
+  "theme_color": "#a6d975",
+  "icons": [
+    {
+      "src": "./assets/app-icon.svg.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

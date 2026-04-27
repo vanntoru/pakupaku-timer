@@ -17,6 +17,11 @@
   box-sizing: border-box;
 }
 
+html {
+  min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
 [hidden] {
   display: none !important;
 }
@@ -24,6 +29,7 @@
 body {
   margin: 0;
   min-height: 100vh;
+  min-height: 100svh;
   overflow: hidden;
   background:
     radial-gradient(circle at 8% 12%, rgba(255, 255, 255, 0.8) 0 1.6rem, transparent 1.7rem),
@@ -32,16 +38,39 @@ body {
   color: var(--ink);
 }
 
+@supports (min-height: 100dvh) {
+  body {
+    min-height: 100dvh;
+  }
+}
+
 button,
 input {
   font: inherit;
 }
 
+button {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .app {
   min-height: 100vh;
+  min-height: 100svh;
   display: grid;
   place-items: center;
-  padding: clamp(10px, 2vw, 24px);
+  padding:
+    max(clamp(10px, 2vw, 24px), env(safe-area-inset-top))
+    max(clamp(10px, 2vw, 24px), env(safe-area-inset-right))
+    max(clamp(10px, 2vw, 24px), env(safe-area-inset-bottom))
+    max(clamp(10px, 2vw, 24px), env(safe-area-inset-left));
+}
+
+@supports (min-height: 100dvh) {
+  .app {
+    min-height: 100dvh;
+  }
 }
 
 .stage {
@@ -1430,7 +1459,414 @@ input:focus-visible {
   }
 
   .stage {
-    min-width: 960px;
-    min-height: 720px;
+    min-width: 0;
+    min-height: min(720px, calc(100svh - 20px));
+    max-height: none;
+  }
+
+  .content {
+    grid-template-columns: 78px minmax(390px, 460px) 142px;
+    gap: 12px;
+    padding-inline: 16px;
+  }
+
+  .timer-wrap {
+    width: min(100%, 460px);
+  }
+
+  .side-panel {
+    min-height: 320px;
+    padding-inline: 10px;
+  }
+
+  .side-panel p {
+    margin-bottom: 10px;
+    font-size: 17px;
+  }
+
+  .side-panel strong {
+    font-size: 18px;
+  }
+
+  .arrow {
+    font-size: 38px;
+  }
+
+  .mascot-demo {
+    width: 70px;
+    height: 70px;
+  }
+
+  .mini-eye {
+    left: 33px;
+    top: 19px;
+    width: 15px;
+    height: 11px;
+    border-top-width: 4px;
+  }
+
+  .mini-cheek {
+    left: 15px;
+    top: 35px;
+    width: 13px;
+    height: 11px;
+  }
+
+  .mini-mouth {
+    top: 20px;
+    width: 37px;
+    height: 34px;
+  }
+
+  .mascot-demo.closed .mini-mouth {
+    top: 36px;
+  }
+
+  .settings-button,
+  .sound-button {
+    width: 78px;
+    height: 78px;
+  }
+
+  .controls button {
+    min-width: 114px;
+    font-size: 21px;
+  }
+}
+
+@supports (min-height: 100dvh) {
+  @media (max-width: 980px), (max-height: 760px) {
+    .stage {
+      min-height: min(720px, calc(100dvh - 20px));
+    }
+  }
+}
+
+@media (max-width: 980px) and (orientation: portrait) {
+  body {
+    overflow: auto;
+  }
+
+  .app {
+    place-items: start center;
+  }
+
+  .stage {
+    width: min(100%, 820px);
+    min-width: 0;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: auto;
+    padding-bottom: 112px;
+    border-width: 5px;
+    border-radius: 30px;
+  }
+
+  .bunting {
+    left: 12px;
+    top: 18px;
+    width: 188px;
+    height: 72px;
+  }
+
+  .bunting span {
+    width: 36px;
+    height: 50px;
+  }
+
+  .bunting span:nth-child(2) { left: 36px; }
+  .bunting span:nth-child(3) { left: 72px; }
+  .bunting span:nth-child(4) { left: 108px; }
+  .bunting span:nth-child(5) { left: 144px; }
+
+  .hero {
+    padding-top: 24px;
+  }
+
+  h1 {
+    font-size: clamp(38px, 8vw, 66px);
+    -webkit-text-stroke-width: 7px;
+  }
+
+  .total-time {
+    min-width: 250px;
+    gap: 12px;
+    padding: 7px 22px;
+  }
+
+  .total-time span {
+    font-size: 21px;
+  }
+
+  .total-time strong {
+    font-size: 34px;
+  }
+
+  .content {
+    grid-template-columns: 74px minmax(360px, 430px) 116px;
+    gap: 10px;
+    margin-top: 10px;
+    padding-inline: 14px;
+  }
+
+  .timer-wrap {
+    width: min(100%, 430px);
+  }
+
+  .food-label span {
+    font-size: 20px;
+  }
+
+  .food-label strong {
+    font-size: 32px;
+  }
+
+  .food-icon {
+    width: 56px;
+    height: 44px;
+    font-size: 34px;
+  }
+
+  .pakupaku {
+    width: 118px;
+    height: 118px;
+  }
+
+  .eye {
+    left: 55px;
+    top: 32px;
+    width: 23px;
+  }
+
+  .cheek {
+    left: 27px;
+    top: 60px;
+  }
+
+  .mouth {
+    top: 34px;
+    width: 62px;
+    height: 56px;
+  }
+
+  .pakupaku.closed .mouth {
+    top: 52px;
+  }
+
+  .side-panel {
+    min-height: 338px;
+    padding: 14px 9px;
+    border-radius: 22px;
+  }
+
+  .side-panel::before {
+    left: -22px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .side-panel p {
+    font-size: 17px;
+  }
+
+  .side-panel strong {
+    font-size: 19px;
+  }
+
+  .mascot-demo {
+    width: 74px;
+    height: 74px;
+  }
+
+  .mini-eye {
+    left: 35px;
+    top: 20px;
+  }
+
+  .mini-cheek {
+    left: 16px;
+    top: 37px;
+  }
+
+  .mini-mouth {
+    top: 21px;
+    width: 40px;
+    height: 36px;
+  }
+
+  .mascot-demo.closed .mini-mouth {
+    top: 38px;
+  }
+
+  .settings-button,
+  .sound-button {
+    width: 72px;
+    height: 72px;
+    border-width: 4px;
+  }
+
+  .settings-button {
+    margin-bottom: 22px;
+  }
+
+  .settings-button span,
+  .sound-button span {
+    font-size: 30px;
+  }
+
+  .settings-button small,
+  .sound-button small {
+    font-size: 14px;
+  }
+
+  .sound-button {
+    right: 18px;
+    bottom: 18px;
+  }
+
+  .controls {
+    bottom: 18px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: min(100% - 108px, 420px);
+  }
+
+  .controls button {
+    min-width: 116px;
+    min-height: 54px;
+    padding: 8px 16px;
+    font-size: 20px;
+  }
+
+  .settings {
+    bottom: 92px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: min(100% - 28px, 520px);
+  }
+
+  .settings label {
+    grid-template-columns: 82px 62px 20px;
+    font-size: 16px;
+  }
+
+  .complete-message {
+    bottom: 96px;
+    min-width: min(360px, calc(100% - 40px));
+  }
+}
+
+@media (max-width: 720px) and (orientation: portrait) {
+  .stage {
+    padding-bottom: 168px;
+  }
+
+  h1 {
+    font-size: clamp(32px, 8.4vw, 48px);
+    -webkit-text-stroke-width: 5px;
+  }
+
+  .content {
+    grid-template-columns: 64px minmax(250px, 1fr) 64px;
+    align-items: center;
+    gap: 4px;
+    padding-inline: 8px;
+  }
+
+  .side-panel {
+    display: none;
+  }
+
+  .settings-button,
+  .sound-button {
+    width: 62px;
+    height: 62px;
+  }
+
+  .settings-button {
+    margin-bottom: 16px;
+  }
+
+  .settings-button span,
+  .sound-button span {
+    font-size: 26px;
+  }
+
+  .settings-button small,
+  .sound-button small {
+    font-size: 12px;
+  }
+
+  .food-label {
+    min-width: 74px;
+  }
+
+  .food-label span {
+    font-size: 15px;
+  }
+
+  .food-label small {
+    font-size: 10px;
+  }
+
+  .food-label strong {
+    margin-top: 2px;
+    font-size: 24px;
+  }
+
+  .food-icon {
+    width: 42px;
+    height: 34px;
+    margin-bottom: 2px;
+    font-size: 28px;
+  }
+
+  .food-label.yogurt {
+    left: 7%;
+  }
+
+  .food-label.egg {
+    left: 37%;
+    bottom: 12%;
+  }
+
+  .food-label.rice {
+    right: 7%;
+  }
+
+  .pakupaku {
+    width: 96px;
+    height: 96px;
+  }
+
+  .eye {
+    left: 45px;
+    top: 26px;
+    width: 20px;
+    height: 15px;
+    border-top-width: 6px;
+  }
+
+  .cheek {
+    left: 22px;
+    top: 49px;
+    width: 20px;
+    height: 17px;
+  }
+
+  .mouth {
+    right: -4px;
+    top: 28px;
+    width: 52px;
+    height: 46px;
+  }
+
+  .pakupaku.closed .mouth {
+    top: 43px;
+    height: 16px;
+  }
+
+  .controls {
+    width: min(100% - 32px, 380px);
   }
 }

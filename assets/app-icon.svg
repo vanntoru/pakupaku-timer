@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">ぱくぱくタイマー</title>
+  <desc id="desc">緑の背景に黄色いパクパクくんがいるアイコン。</desc>
+  <rect width="512" height="512" rx="112" fill="#a6d975"/>
+  <circle cx="256" cy="256" r="190" fill="#fff9e9"/>
+  <path d="M256 74a182 182 0 0 1 157 90L256 256Z" fill="#f6f0db"/>
+  <path d="M413 164a182 182 0 0 1 0 184L256 256Z" fill="#f6f0db"/>
+  <path d="M413 348a182 182 0 0 1-314 0L256 256Z" fill="#ffc928"/>
+  <path d="M99 348a182 182 0 0 1 0-184l157 92Z" fill="#b9a4ed"/>
+  <circle cx="256" cy="256" r="88" fill="#ffd83d"/>
+  <path d="M260 256 374 186v140Z" fill="#77370f"/>
+  <circle cx="218" cy="282" r="24" fill="#ff9781"/>
+  <path d="M242 226c18-20 45-14 54 6" fill="none" stroke="#58310d" stroke-width="16" stroke-linecap="round"/>
+  <path d="M180 382h152" fill="none" stroke="#7ebc55" stroke-width="22" stroke-linecap="round" opacity=".85"/>
+</svg>

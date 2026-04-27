@@ -218,6 +218,9 @@ function playPakuSound() {
   if (!AudioContext) return;
   state.audioContext ||= new AudioContext();
   const context = state.audioContext;
+  if (context.state === "suspended") {
+    context.resume();
+  }
   const oscillator = context.createOscillator();
   const gain = context.createGain();
   const now = context.currentTime;
@@ -233,6 +236,16 @@ function playPakuSound() {
   gain.connect(context.destination);
   oscillator.start(now);
   oscillator.stop(now + 0.2);
+}
+
+function unlockAudio() {
+  if (!state.sound) return;
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContext) return;
+  state.audioContext ||= new AudioContext();
+  if (state.audioContext.state === "suspended") {
+    state.audioContext.resume();
+  }
 }
 
 function tick(timestamp) {
@@ -267,6 +280,7 @@ function tick(timestamp) {
 }
 
 function startTimer() {
+  unlockAudio();
   if (state.elapsed >= getTotalSeconds()) {
     state.elapsed = 0;
   }
@@ -299,6 +313,7 @@ resetButton.addEventListener("click", () => {
 });
 
 testButton.addEventListener("click", () => {
+  unlockAudio();
   setTestMode(true);
   resetTimer();
 });
@@ -322,6 +337,7 @@ settingsButton.addEventListener("click", () => {
 soundButton.addEventListener("click", () => {
   state.sound = !state.sound;
   soundButton.setAttribute("aria-pressed", String(state.sound));
+  unlockAudio();
 });
 
 foods.forEach((food) => {
@@ -337,3 +353,11 @@ foods.forEach((food) => {
 
 renderSegments();
 updateVisuals();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {
+      // Offline support is optional when opened as a local file.
+    });
+  });
+}
