@@ -124,6 +124,22 @@ function getDurations() {
   });
 }
 
+function populateDurationSelects() {
+  foods.forEach((food) => {
+    const defaultMinutes = Number.parseInt(food.input.dataset.defaultMinutes, 10);
+    const selectedMinutes = Number.isFinite(defaultMinutes) ? Math.min(60, Math.max(1, defaultMinutes)) : 1;
+
+    for (let minutes = 1; minutes <= 60; minutes += 1) {
+      const option = document.createElement("option");
+      option.value = String(minutes);
+      option.textContent = String(minutes);
+      food.input.appendChild(option);
+    }
+
+    food.input.value = String(selectedMinutes);
+  });
+}
+
 function setTestMode(isTestMode) {
   state.testMode = isTestMode;
   testButton.setAttribute("aria-pressed", String(isTestMode));
@@ -328,10 +344,34 @@ function resetTimer() {
   updateVisuals();
 }
 
+function openSettingsPanel() {
+  settingsPanel.hidden = false;
+  settingsButton.setAttribute("aria-expanded", "true");
+}
+
+function closeSettingsPanel() {
+  settingsPanel.hidden = true;
+  settingsButton.setAttribute("aria-expanded", "false");
+}
+
+function toggleSettingsPanel() {
+  if (settingsPanel.hidden) {
+    openSettingsPanel();
+  } else {
+    closeSettingsPanel();
+  }
+}
+
 settingsButton.addEventListener("click", () => {
-  const isHidden = settingsPanel.hidden;
-  settingsPanel.hidden = !isHidden;
-  settingsButton.setAttribute("aria-expanded", String(isHidden));
+  toggleSettingsPanel();
+});
+
+document.addEventListener("pointerdown", (event) => {
+  if (settingsPanel.hidden) return;
+  if (!(event.target instanceof Node)) return;
+  if (settingsPanel.contains(event.target) || settingsButton.contains(event.target)) return;
+
+  closeSettingsPanel();
 });
 
 soundButton.addEventListener("click", () => {
@@ -341,16 +381,14 @@ soundButton.addEventListener("click", () => {
 });
 
 foods.forEach((food) => {
-  food.input.addEventListener("input", () => {
+  food.input.addEventListener("change", () => {
     setTestMode(false);
-    const value = Number.parseInt(food.input.value, 10);
-    if (!Number.isFinite(value)) return;
-    food.input.value = String(Math.min(60, Math.max(1, value)));
     state.elapsed = Math.min(state.elapsed, getTotalSeconds());
     updateVisuals();
   });
 });
 
+populateDurationSelects();
 renderSegments();
 updateVisuals();
 

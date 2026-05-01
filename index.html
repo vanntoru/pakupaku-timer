@@ -103,7 +103,7 @@
           </h1>
           <div class="total-time" aria-live="polite">
             <span>ぜんたい</span>
-            <strong id="totalMinutes">20分</strong>
+            <strong id="totalMinutes">14分</strong>
           </div>
         </header>
 
@@ -144,12 +144,12 @@
               <div class="food-icon" aria-hidden="true">🍳</div>
               <small>たまごや</small>
               <span>卵焼き</span>
-              <strong id="eggRemaining">7分</strong>
+              <strong id="eggRemaining">5分</strong>
             </div>
             <div class="food-label rice">
               <div class="food-icon" aria-hidden="true">🍚</div>
               <span>ごはん</span>
-              <strong id="riceRemaining">9分</strong>
+              <strong id="riceRemaining">5分</strong>
             </div>
 
             <div class="pakupaku" id="pakupaku" aria-label="パクパクくん">
@@ -191,17 +191,17 @@
         <section class="settings" id="settingsPanel" aria-label="時間設定" hidden>
           <label>
             <span>ヨーグルト</span>
-            <input id="yogurtInput" type="number" min="1" max="60" step="1" value="4" />
+            <select id="yogurtInput" data-default-minutes="4" aria-label="ヨーグルトの時間"></select>
             <em>分</em>
           </label>
           <label>
             <span>卵焼き</span>
-            <input id="eggInput" type="number" min="1" max="60" step="1" value="7" />
+            <select id="eggInput" data-default-minutes="5" aria-label="卵焼きの時間"></select>
             <em>分</em>
           </label>
           <label>
             <span>ごはん</span>
-            <input id="riceInput" type="number" min="1" max="60" step="1" value="9" />
+            <select id="riceInput" data-default-minutes="5" aria-label="ごはんの時間"></select>
             <em>分</em>
           </label>
         </section>

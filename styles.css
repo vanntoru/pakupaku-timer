@@ -45,7 +45,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -1344,7 +1345,7 @@ h1 span:nth-child(5) { color: #9d6218; }
 }
 
 .controls button,
-.settings input {
+.settings select {
   border-radius: 999px;
   border: 4px solid #e4c86d;
   background: linear-gradient(180deg, #fff8c7, #ffdf6d);
@@ -1387,7 +1388,7 @@ h1 span:nth-child(5) { color: #9d6218; }
 
 .settings label {
   display: grid;
-  grid-template-columns: 98px 64px 22px;
+  grid-template-columns: 98px 78px 22px;
   align-items: center;
   gap: 6px;
   font-size: 18px;
@@ -1398,10 +1399,18 @@ h1 span:nth-child(5) { color: #9d6218; }
   white-space: nowrap;
 }
 
-.settings input {
-  width: 64px;
+.settings select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 78px;
   height: 48px;
+  padding: 0 24px 0 14px;
+  background:
+    linear-gradient(45deg, transparent 50%, #76511e 50%) right 15px center / 7px 7px no-repeat,
+    linear-gradient(135deg, #76511e 50%, transparent 50%) right 10px center / 7px 7px no-repeat,
+    linear-gradient(180deg, #fff8c7, #ffdf6d);
   text-align: center;
+  text-align-last: center;
   font-size: 24px;
 }
 
@@ -1445,7 +1454,8 @@ h1 span:nth-child(5) { color: #9d6218; }
 }
 
 button:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible {
   outline: 5px solid rgba(87, 156, 220, 0.85);
   outline-offset: 4px;
 }
@@ -1747,7 +1757,7 @@ input:focus-visible {
   }
 
   .settings label {
-    grid-template-columns: 82px 62px 20px;
+    grid-template-columns: 82px 78px 20px;
     font-size: 16px;
   }
 
