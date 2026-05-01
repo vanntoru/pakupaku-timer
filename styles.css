@@ -1260,6 +1260,7 @@ h1 span:nth-child(5) { color: #9d6218; }
   width: 92px;
   height: 92px;
   margin: 0 0 8px;
+  overflow: hidden;
 }
 
 .mini-eye {
@@ -1307,6 +1308,7 @@ h1 span:nth-child(5) { color: #9d6218; }
 
 .settings-button {
   grid-area: settings;
+  z-index: 9;
   align-self: end;
   margin-bottom: 28px;
 }

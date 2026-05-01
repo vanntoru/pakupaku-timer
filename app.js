@@ -35,6 +35,8 @@ const state = {
   testMode: false,
   sound: true,
   elapsed: 0,
+  appliedMinutes: {},
+  editingMinutes: {},
   lastTick: 0,
   mouthOpen: true,
   mouthTimer: 0,
@@ -52,6 +54,7 @@ const settingsPanel = document.querySelector("#settingsPanel");
 const soundButton = document.querySelector("#soundButton");
 const completeMessage = document.querySelector("#completeMessage");
 const pakupaku = document.querySelector("#pakupaku");
+let ignoreNextSettingsButtonClick = false;
 
 function polarToCartesian(cx, cy, radius, angleInDegrees) {
   const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180;
@@ -118,16 +121,55 @@ function getDurations() {
     return foods.map(() => 5);
   }
 
-  return foods.map((food) => {
-    const value = Number.parseInt(food.input.value, 10);
-    return Number.isFinite(value) ? Math.min(60, Math.max(1, value)) * 60 : 60;
+  return foods.map((food) => getAppliedMinutes(food) * 60);
+}
+
+function clampMinutes(value, fallback = 1) {
+  return Number.isFinite(value) ? Math.min(60, Math.max(1, value)) : fallback;
+}
+
+function getDefaultMinutes(food) {
+  return clampMinutes(Number.parseInt(food.input.dataset.defaultMinutes, 10));
+}
+
+function getInputMinutes(food) {
+  return clampMinutes(Number.parseInt(food.input.value, 10), getDefaultMinutes(food));
+}
+
+function getAppliedMinutes(food) {
+  return state.appliedMinutes[food.id] ?? getDefaultMinutes(food);
+}
+
+function readEditingMinutesFromInputs() {
+  foods.forEach((food) => {
+    state.editingMinutes[food.id] = getInputMinutes(food);
   });
+}
+
+function loadAppliedMinutesIntoSettings() {
+  foods.forEach((food) => {
+    const minutes = getAppliedMinutes(food);
+    state.editingMinutes[food.id] = minutes;
+    food.input.value = String(minutes);
+  });
+}
+
+function applyEditingMinutes() {
+  readEditingMinutesFromInputs();
+  const hasChanges = foods.some((food) => state.editingMinutes[food.id] !== getAppliedMinutes(food));
+  if (!hasChanges) return;
+
+  foods.forEach((food) => {
+    state.appliedMinutes[food.id] = state.editingMinutes[food.id];
+  });
+  setTestMode(false);
+  state.elapsed = Math.min(state.elapsed, getTotalSeconds());
+  updateVisuals();
 }
 
 function populateDurationSelects() {
   foods.forEach((food) => {
-    const defaultMinutes = Number.parseInt(food.input.dataset.defaultMinutes, 10);
-    const selectedMinutes = Number.isFinite(defaultMinutes) ? Math.min(60, Math.max(1, defaultMinutes)) : 1;
+    const selectedMinutes = getDefaultMinutes(food);
 
     for (let minutes = 1; minutes <= 60; minutes += 1) {
       const option = document.createElement("option");
@@ -136,6 +178,8 @@ function populateDurationSelects() {
       food.input.appendChild(option);
     }
 
+    state.appliedMinutes[food.id] = selectedMinutes;
+    state.editingMinutes[food.id] = selectedMinutes;
     food.input.value = String(selectedMinutes);
   });
 }
@@ -345,11 +389,13 @@ function resetTimer() {
 }
 
 function openSettingsPanel() {
+  loadAppliedMinutesIntoSettings();
   settingsPanel.hidden = false;
   settingsButton.setAttribute("aria-expanded", "true");
 }
 
 function closeSettingsPanel() {
+  applyEditingMinutes();
   settingsPanel.hidden = true;
   settingsButton.setAttribute("aria-expanded", "false");
 }
@@ -363,16 +409,38 @@ function toggleSettingsPanel() {
 }
 
 settingsButton.addEventListener("click", () => {
+  if (ignoreNextSettingsButtonClick) {
+    ignoreNextSettingsButtonClick = false;
+    return;
+  }
+
   toggleSettingsPanel();
 });
 
-document.addEventListener("pointerdown", (event) => {
-  if (settingsPanel.hidden) return;
-  if (!(event.target instanceof Node)) return;
-  if (settingsPanel.contains(event.target) || settingsButton.contains(event.target)) return;
+document.addEventListener(
+  "pointerdown",
+  (event) => {
+    if (settingsPanel.hidden) return;
+    if (!(event.target instanceof Node)) return;
 
-  closeSettingsPanel();
-});
+    const settingsButtonRect = settingsButton.getBoundingClientRect();
+    const isSettingsButtonTap =
+      event.clientX >= settingsButtonRect.left &&
+      event.clientX <= settingsButtonRect.right &&
+      event.clientY >= settingsButtonRect.top &&
+      event.clientY <= settingsButtonRect.bottom;
+    if (isSettingsButtonTap) {
+      ignoreNextSettingsButtonClick = true;
+      closeSettingsPanel();
+      return;
+    }
+
+    if (settingsPanel.contains(event.target) || settingsButton.contains(event.target)) return;
+
+    closeSettingsPanel();
+  },
+  { capture: true },
+);
 
 soundButton.addEventListener("click", () => {
   state.sound = !state.sound;
@@ -382,9 +450,7 @@ soundButton.addEventListener("click", () => {
 
 foods.forEach((food) => {
   food.input.addEventListener("change", () => {
-    setTestMode(false);
-    state.elapsed = Math.min(state.elapsed, getTotalSeconds());
-    updateVisuals();
+    state.editingMinutes[food.id] = getInputMinutes(food);
   });
 });
 
