@@ -199,7 +199,8 @@ h1 span:nth-child(5) { color: #9d6218; }
   position: relative;
   z-index: 2;
   display: grid;
-  grid-template-columns: 92px minmax(450px, 500px) 168px;
+  grid-template-columns: 168px minmax(450px, 500px) 168px;
+  grid-template-areas: "settings timer demo";
   justify-content: center;
   align-items: center;
   gap: 18px;
@@ -208,6 +209,7 @@ h1 span:nth-child(5) { color: #9d6218; }
 }
 
 .timer-wrap {
+  grid-area: timer;
   position: relative;
   width: min(100%, 500px);
   aspect-ratio: 1;
@@ -1204,6 +1206,7 @@ h1 span:nth-child(5) { color: #9d6218; }
 }
 
 .side-panel {
+  grid-area: demo;
   position: relative;
   display: grid;
   justify-items: center;
@@ -1303,6 +1306,7 @@ h1 span:nth-child(5) { color: #9d6218; }
 }
 
 .settings-button {
+  grid-area: settings;
   align-self: end;
   margin-bottom: 28px;
 }
@@ -1476,7 +1480,7 @@ select:focus-visible {
   }
 
   .content {
-    grid-template-columns: 78px minmax(390px, 460px) 142px;
+    grid-template-columns: 142px minmax(390px, 460px) 142px;
     gap: 12px;
     padding-inline: 16px;
   }
@@ -1614,7 +1618,7 @@ select:focus-visible {
   }
 
   .content {
-    grid-template-columns: 74px minmax(360px, 430px) 116px;
+    grid-template-columns: 116px minmax(360px, 430px) 116px;
     gap: 10px;
     margin-top: 10px;
     padding-inline: 14px;
@@ -1779,6 +1783,7 @@ select:focus-visible {
 
   .content {
     grid-template-columns: 64px minmax(250px, 1fr) 64px;
+    grid-template-areas: "settings timer demo";
     align-items: center;
     gap: 4px;
     padding-inline: 8px;
@@ -1795,6 +1800,16 @@ select:focus-visible {
   }
 
   .settings-button {
+    margin-bottom: 16px;
+  }
+
+  .sound-button {
+    position: relative;
+    grid-area: demo;
+    right: auto;
+    bottom: auto;
+    align-self: end;
+    justify-self: center;
     margin-bottom: 16px;
   }
 
