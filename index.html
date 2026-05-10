@@ -206,6 +206,15 @@
           </label>
         </section>
 
+        <section class="confirmation-panel" id="confirmationPanel" role="status" aria-live="polite" hidden>
+          <span id="confirmationDoneFood">ごはん おしまい？</span>
+          <strong id="confirmationNextFood">つぎは 卵焼き</strong>
+          <div class="confirmation-actions" aria-label="区切り確認">
+            <button id="nextFoodButton" type="button">つぎへ</button>
+            <button id="extendFoodButton" type="button">もう1分</button>
+          </div>
+        </section>
+
         <div class="complete-message" id="completeMessage" role="status" aria-live="polite" hidden>
           <span>ごちそうさま!</span>
           <strong>ぜんぶ食べたよ</strong>

@@ -37,6 +37,8 @@ const state = {
   elapsed: 0,
   appliedMinutes: {},
   editingMinutes: {},
+  extraSeconds: {},
+  pendingConfirmation: null,
   lastTick: 0,
   mouthOpen: true,
   mouthTimer: 0,
@@ -52,6 +54,11 @@ const testButton = document.querySelector("#testButton");
 const settingsButton = document.querySelector("#settingsButton");
 const settingsPanel = document.querySelector("#settingsPanel");
 const soundButton = document.querySelector("#soundButton");
+const confirmationPanel = document.querySelector("#confirmationPanel");
+const confirmationDoneFood = document.querySelector("#confirmationDoneFood");
+const confirmationNextFood = document.querySelector("#confirmationNextFood");
+const nextFoodButton = document.querySelector("#nextFoodButton");
+const extendFoodButton = document.querySelector("#extendFoodButton");
 const completeMessage = document.querySelector("#completeMessage");
 const pakupaku = document.querySelector("#pakupaku");
 let ignoreNextSettingsButtonClick = false;
@@ -116,12 +123,13 @@ function renderSegments() {
   });
 }
 
-function getDurations() {
-  if (state.testMode) {
-    return foods.map(() => 5);
-  }
+function getFoodDuration(food) {
+  const baseSeconds = state.testMode ? 5 : getAppliedMinutes(food) * 60;
+  return baseSeconds + (state.extraSeconds[food.id] ?? 0);
+}
 
-  return foods.map((food) => getAppliedMinutes(food) * 60);
+function getDurations() {
+  return foods.map((food) => getFoodDuration(food));
 }
 
 function clampMinutes(value, fallback = 1) {
@@ -163,6 +171,8 @@ function applyEditingMinutes() {
     state.appliedMinutes[food.id] = state.editingMinutes[food.id];
   });
   setTestMode(false);
+  clearBoundaryConfirmation();
+  clearExtraSeconds();
   state.elapsed = Math.min(state.elapsed, getTotalSeconds());
   updateVisuals();
 }
@@ -228,9 +238,60 @@ function getFoodProgress(elapsed) {
   };
 }
 
+function getFoodBoundary(index) {
+  const durationByFood = getDurationByFood();
+  return eatingOrder
+    .slice(0, index + 1)
+    .reduce((sum, food) => sum + durationByFood.get(food.id), 0);
+}
+
+function findCrossedBoundary(previousElapsed, nextElapsed) {
+  for (let index = 0; index < eatingOrder.length; index += 1) {
+    const boundaryElapsed = getFoodBoundary(index);
+    if (previousElapsed < boundaryElapsed && nextElapsed >= boundaryElapsed) {
+      return {
+        food: eatingOrder[index],
+        nextFood: eatingOrder[index + 1] ?? null,
+        boundaryElapsed,
+      };
+    }
+  }
+  return null;
+}
+
+function clearExtraSeconds() {
+  state.extraSeconds = {};
+}
+
+function clearBoundaryConfirmation() {
+  state.pendingConfirmation = null;
+}
+
+function showBoundaryConfirmation(boundary) {
+  state.pendingConfirmation = {
+    foodId: boundary.food.id,
+    foodLabel: boundary.food.label,
+    nextFoodId: boundary.nextFood.id,
+    nextFoodLabel: boundary.nextFood.label,
+    boundaryElapsed: boundary.boundaryElapsed,
+  };
+}
+
+function updateConfirmationPanel() {
+  const confirmation = state.pendingConfirmation;
+  confirmationPanel.hidden = !confirmation;
+  stage.classList.toggle("awaiting-confirmation", Boolean(confirmation));
+  startPauseButton.disabled = Boolean(confirmation);
+
+  if (!confirmation) return;
+
+  confirmationDoneFood.textContent = `${confirmation.foodLabel} おしまい？`;
+  confirmationNextFood.textContent = `つぎは ${confirmation.nextFoodLabel}`;
+}
+
 function setCompletion(isComplete) {
   completeMessage.hidden = !isComplete;
-  pakupaku.classList.toggle("chomping", state.running && !isComplete);
+  pakupaku.classList.toggle("chomping", state.running && !isComplete && !state.pendingConfirmation);
   pakupaku.classList.toggle("happy", isComplete);
   if (isComplete) {
     pakupaku.classList.remove("closed");
@@ -270,6 +331,7 @@ function updateVisuals() {
 
   setCompletion(elapsed >= total);
   startPauseButton.textContent = state.running ? "とめる" : elapsed >= total ? "もう一回" : "スタート";
+  updateConfirmationPanel();
 }
 
 function playPakuSound() {
@@ -314,9 +376,27 @@ function tick(timestamp) {
   const delta = (timestamp - state.lastTick) / 1000;
   state.lastTick = timestamp;
 
-  const previousProgress = getFoodProgress(state.elapsed).activeIndex;
-  state.elapsed = Math.min(state.elapsed + delta, getTotalSeconds());
-  const nextProgress = getFoodProgress(state.elapsed).activeIndex;
+  const nextElapsed = Math.min(state.elapsed + delta, getTotalSeconds());
+  const crossedBoundary = findCrossedBoundary(state.elapsed, nextElapsed);
+
+  if (crossedBoundary) {
+    state.elapsed = crossedBoundary.boundaryElapsed;
+    state.running = false;
+    state.lastTick = 0;
+    state.mouthTimer = 0;
+    state.mouthOpen = true;
+    pakupaku.classList.remove("closed", "chomping");
+    playPakuSound();
+
+    if (crossedBoundary.nextFood) {
+      showBoundaryConfirmation(crossedBoundary);
+    }
+
+    updateVisuals();
+    return;
+  }
+
+  state.elapsed = nextElapsed;
 
   state.mouthTimer += delta;
   if (state.mouthTimer > 0.28) {
@@ -325,23 +405,15 @@ function tick(timestamp) {
     pakupaku.classList.toggle("closed", !state.mouthOpen);
   }
 
-  if (nextProgress !== previousProgress) {
-    playPakuSound();
-  }
-
-  if (state.elapsed >= getTotalSeconds()) {
-    state.running = false;
-    state.lastTick = 0;
-    playPakuSound();
-  }
-
   updateVisuals();
   if (state.running) requestAnimationFrame(tick);
 }
 
 function startTimer() {
+  if (state.pendingConfirmation) return;
   unlockAudio();
   if (state.elapsed >= getTotalSeconds()) {
+    clearExtraSeconds();
     state.elapsed = 0;
   }
   state.running = true;
@@ -378,9 +450,28 @@ testButton.addEventListener("click", () => {
   resetTimer();
 });
 
+nextFoodButton.addEventListener("click", () => {
+  if (!state.pendingConfirmation) return;
+
+  state.elapsed = state.pendingConfirmation.boundaryElapsed;
+  clearBoundaryConfirmation();
+  startTimer();
+});
+
+extendFoodButton.addEventListener("click", () => {
+  if (!state.pendingConfirmation) return;
+
+  state.extraSeconds[state.pendingConfirmation.foodId] =
+    (state.extraSeconds[state.pendingConfirmation.foodId] ?? 0) + 60;
+  clearBoundaryConfirmation();
+  startTimer();
+});
+
 function resetTimer() {
   state.running = false;
   state.elapsed = 0;
+  clearBoundaryConfirmation();
+  clearExtraSeconds();
   state.lastTick = 0;
   state.mouthTimer = 0;
   state.mouthOpen = true;

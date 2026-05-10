@@ -1,4 +1,4 @@
-const CACHE_NAME = "pakupaku-timer-v2";
+const CACHE_NAME = "pakupaku-timer-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
