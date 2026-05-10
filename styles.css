@@ -1065,7 +1065,6 @@ h1 span:nth-child(5) { color: #9d6218; }
   position: absolute;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 38% 56%, #ff9b86 0 13px, transparent 14px),
     radial-gradient(circle at 32% 30%, rgba(255, 255, 255, 0.62) 0 30px, transparent 32px),
     linear-gradient(145deg, #ffe86b, #ffc400 74%);
   box-shadow: inset -12px -14px 0 rgba(231, 155, 0, 0.26), 0 9px 18px rgba(83, 62, 24, 0.2);
