@@ -1498,11 +1498,11 @@ h1 span:nth-child(5) { color: #9d6218; }
   position: absolute;
   z-index: 9;
   left: 50%;
-  bottom: 82px;
+  bottom: 70px;
   display: grid;
   justify-items: center;
   min-width: 360px;
-  padding: 10px 30px;
+  padding: 12px 30px 16px;
   border: 6px solid #8fce66;
   border-radius: 36px;
   background: rgba(255, 253, 237, 0.98);
@@ -1521,6 +1521,53 @@ h1 span:nth-child(5) { color: #9d6218; }
   color: #5f9f3f;
   font-size: 21px;
   line-height: 1.18;
+}
+
+.spent-times {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 3px dashed rgba(143, 206, 102, 0.72);
+}
+
+.spent-times-heading {
+  color: #8b6337;
+  font-size: 17px;
+  line-height: 1.1;
+  font-weight: 900;
+}
+
+.spent-times dl {
+  display: grid;
+  gap: 4px;
+  width: min(100%, 280px);
+  margin: 0;
+}
+
+.spent-times div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.spent-times dt,
+.spent-times dd {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.15;
+  font-weight: 900;
+}
+
+.spent-times dt {
+  color: #6b3516;
+}
+
+.spent-times dd {
+  color: #f06622;
 }
 
 .active-yogurt .food-label.yogurt,

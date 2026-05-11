@@ -38,6 +38,7 @@ const state = {
   appliedMinutes: {},
   editingMinutes: {},
   extraSeconds: {},
+  spentSecondsByFood: { rice: 0, egg: 0, yogurt: 0 },
   pendingConfirmation: null,
   activeExtension: null,
   lastTick: 0,
@@ -63,6 +64,7 @@ const extendFoodButton = document.querySelector("#extendFoodButton");
 const extensionPanel = document.querySelector("#extensionPanel");
 const completeExtensionButton = document.querySelector("#completeExtensionButton");
 const completeMessage = document.querySelector("#completeMessage");
+const spentTimes = document.querySelector("#spentTimes");
 const pakupaku = document.querySelector("#pakupaku");
 let ignoreNextSettingsButtonClick = false;
 
@@ -177,6 +179,7 @@ function applyEditingMinutes() {
   clearBoundaryConfirmation();
   clearActiveExtension();
   clearExtraSeconds();
+  resetSpentSeconds();
   state.elapsed = Math.min(state.elapsed, getTotalSeconds());
   updateVisuals();
 }
@@ -214,6 +217,16 @@ function getTotalSeconds() {
 
 function formatMinutes(seconds) {
   return `${Math.max(0, Math.ceil(seconds / 60))}分`;
+}
+
+function formatSpentSeconds(seconds) {
+  const wholeSeconds = Math.max(0, Math.round(seconds));
+  const minutes = Math.floor(wholeSeconds / 60);
+  const remainingSeconds = wholeSeconds % 60;
+
+  if (minutes === 0) return `${remainingSeconds}秒`;
+  if (remainingSeconds === 0) return `${minutes}分`;
+  return `${minutes}分${remainingSeconds}秒`;
 }
 
 function getFoodProgress(elapsed) {
@@ -267,6 +280,10 @@ function clearExtraSeconds() {
   state.extraSeconds = {};
 }
 
+function resetSpentSeconds() {
+  state.spentSecondsByFood = { rice: 0, egg: 0, yogurt: 0 };
+}
+
 function clearBoundaryConfirmation() {
   state.pendingConfirmation = null;
 }
@@ -279,8 +296,8 @@ function showBoundaryConfirmation(boundary) {
   state.pendingConfirmation = {
     foodId: boundary.food.id,
     foodLabel: boundary.food.label,
-    nextFoodId: boundary.nextFood.id,
-    nextFoodLabel: boundary.nextFood.label,
+    nextFoodId: boundary.nextFood?.id ?? null,
+    nextFoodLabel: boundary.nextFood?.label ?? null,
     boundaryElapsed: boundary.boundaryElapsed,
   };
 }
@@ -303,6 +320,13 @@ function updateConfirmationPanel() {
 
   if (!confirmation) return;
 
+  const isFinalConfirmation = !confirmation.nextFoodId;
+  confirmationDoneFood.hidden = isFinalConfirmation;
+  confirmationNextFood.hidden = isFinalConfirmation;
+  nextFoodButton.textContent = isFinalConfirmation ? "ごちそうさま" : "つぎへ";
+
+  if (isFinalConfirmation) return;
+
   confirmationDoneFood.textContent = `${confirmation.foodLabel} おしまい？`;
   confirmationNextFood.textContent = `つぎは ${confirmation.nextFoodLabel}`;
 }
@@ -311,8 +335,35 @@ function updateExtensionPanel() {
   extensionPanel.hidden = !state.activeExtension;
 }
 
+function updateSpentTimes(isComplete) {
+  if (!spentTimes) return;
+  spentTimes.hidden = !isComplete;
+  if (!isComplete) return;
+
+  spentTimes.innerHTML = "";
+
+  const heading = document.createElement("span");
+  heading.className = "spent-times-heading";
+  heading.textContent = "かかったじかん";
+  spentTimes.appendChild(heading);
+
+  const list = document.createElement("dl");
+  eatingOrder.forEach((food) => {
+    const row = document.createElement("div");
+    const term = document.createElement("dt");
+    const detail = document.createElement("dd");
+
+    term.textContent = food.label;
+    detail.textContent = formatSpentSeconds(state.spentSecondsByFood[food.id] ?? 0);
+    row.append(term, detail);
+    list.appendChild(row);
+  });
+  spentTimes.appendChild(list);
+}
+
 function setCompletion(isComplete) {
   completeMessage.hidden = !isComplete;
+  updateSpentTimes(isComplete);
   pakupaku.classList.toggle("chomping", state.running && !isComplete && !state.pendingConfirmation);
   pakupaku.classList.toggle("happy", isComplete);
   if (isComplete) {
@@ -351,7 +402,7 @@ function updateVisuals() {
     stage.classList.add(`active-${progress.activeFood.id}`);
   }
 
-  setCompletion(elapsed >= total);
+  setCompletion(elapsed >= total && !state.pendingConfirmation);
   startPauseButton.textContent = state.running ? "とめる" : elapsed >= total ? "もう一回" : "スタート";
   updateConfirmationPanel();
   updateExtensionPanel();
@@ -399,10 +450,14 @@ function tick(timestamp) {
   const delta = (timestamp - state.lastTick) / 1000;
   state.lastTick = timestamp;
 
-  const nextElapsed = Math.min(state.elapsed + delta, getTotalSeconds());
-  const crossedBoundary = findCrossedBoundary(state.elapsed, nextElapsed);
+  const previousElapsed = state.elapsed;
+  const nextElapsed = Math.min(previousElapsed + delta, getTotalSeconds());
+  const crossedBoundary = findCrossedBoundary(previousElapsed, nextElapsed);
 
   if (crossedBoundary) {
+    const progressedSeconds = Math.max(0, crossedBoundary.boundaryElapsed - previousElapsed);
+    state.spentSecondsByFood[crossedBoundary.food.id] =
+      (state.spentSecondsByFood[crossedBoundary.food.id] ?? 0) + progressedSeconds;
     state.elapsed = crossedBoundary.boundaryElapsed;
     state.running = false;
     clearActiveExtension();
@@ -412,14 +467,17 @@ function tick(timestamp) {
     pakupaku.classList.remove("closed", "chomping");
     playPakuSound();
 
-    if (crossedBoundary.nextFood) {
-      showBoundaryConfirmation(crossedBoundary);
-    }
+    showBoundaryConfirmation(crossedBoundary);
 
     updateVisuals();
     return;
   }
 
+  const activeFood = getFoodProgress(previousElapsed).activeFood;
+  if (activeFood) {
+    state.spentSecondsByFood[activeFood.id] =
+      (state.spentSecondsByFood[activeFood.id] ?? 0) + Math.max(0, nextElapsed - previousElapsed);
+  }
   state.elapsed = nextElapsed;
 
   state.mouthTimer += delta;
@@ -435,9 +493,13 @@ function tick(timestamp) {
 
 function startTimer() {
   if (state.pendingConfirmation) return;
+  if (!settingsPanel.hidden) {
+    closeSettingsPanel();
+  }
   unlockAudio();
   if (state.elapsed >= getTotalSeconds()) {
     clearExtraSeconds();
+    resetSpentSeconds();
     state.elapsed = 0;
   }
   state.running = true;
@@ -479,6 +541,11 @@ nextFoodButton.addEventListener("click", () => {
 
   state.elapsed = state.pendingConfirmation.boundaryElapsed;
   clearBoundaryConfirmation();
+  if (state.elapsed >= getTotalSeconds()) {
+    updateVisuals();
+    return;
+  }
+
   startTimer();
 });
 
@@ -499,8 +566,22 @@ completeExtensionButton.addEventListener("click", () => {
   const foodIndex = eatingOrder.findIndex((food) => food.id === extension.foodId);
   if (foodIndex === -1) return;
 
+  const shouldKeepRunning = state.running;
   state.elapsed = getFoodBoundary(foodIndex);
   clearActiveExtension();
+  if (!extension.nextFoodId) {
+    state.running = false;
+    state.lastTick = 0;
+    updateVisuals();
+    return;
+  }
+
+  if (shouldKeepRunning) {
+    state.lastTick = 0;
+    updateVisuals();
+    return;
+  }
+
   startTimer();
 });
 
@@ -510,6 +591,7 @@ function resetTimer() {
   clearBoundaryConfirmation();
   clearActiveExtension();
   clearExtraSeconds();
+  resetSpentSeconds();
   state.lastTick = 0;
   state.mouthTimer = 0;
   state.mouthOpen = true;
@@ -518,6 +600,9 @@ function resetTimer() {
 }
 
 function openSettingsPanel() {
+  if (state.running) {
+    pauseTimer();
+  }
   loadAppliedMinutesIntoSettings();
   settingsPanel.hidden = false;
   settingsButton.setAttribute("aria-expanded", "true");
