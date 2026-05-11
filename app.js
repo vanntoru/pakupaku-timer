@@ -39,6 +39,7 @@ const state = {
   editingMinutes: {},
   extraSeconds: {},
   pendingConfirmation: null,
+  activeExtension: null,
   lastTick: 0,
   mouthOpen: true,
   mouthTimer: 0,
@@ -59,6 +60,8 @@ const confirmationDoneFood = document.querySelector("#confirmationDoneFood");
 const confirmationNextFood = document.querySelector("#confirmationNextFood");
 const nextFoodButton = document.querySelector("#nextFoodButton");
 const extendFoodButton = document.querySelector("#extendFoodButton");
+const extensionPanel = document.querySelector("#extensionPanel");
+const completeExtensionButton = document.querySelector("#completeExtensionButton");
 const completeMessage = document.querySelector("#completeMessage");
 const pakupaku = document.querySelector("#pakupaku");
 let ignoreNextSettingsButtonClick = false;
@@ -172,6 +175,7 @@ function applyEditingMinutes() {
   });
   setTestMode(false);
   clearBoundaryConfirmation();
+  clearActiveExtension();
   clearExtraSeconds();
   state.elapsed = Math.min(state.elapsed, getTotalSeconds());
   updateVisuals();
@@ -267,6 +271,10 @@ function clearBoundaryConfirmation() {
   state.pendingConfirmation = null;
 }
 
+function clearActiveExtension() {
+  state.activeExtension = null;
+}
+
 function showBoundaryConfirmation(boundary) {
   state.pendingConfirmation = {
     foodId: boundary.food.id,
@@ -274,6 +282,16 @@ function showBoundaryConfirmation(boundary) {
     nextFoodId: boundary.nextFood.id,
     nextFoodLabel: boundary.nextFood.label,
     boundaryElapsed: boundary.boundaryElapsed,
+  };
+}
+
+function startActiveExtension(confirmation) {
+  state.activeExtension = {
+    foodId: confirmation.foodId,
+    foodLabel: confirmation.foodLabel,
+    nextFoodId: confirmation.nextFoodId,
+    nextFoodLabel: confirmation.nextFoodLabel,
+    boundaryElapsed: confirmation.boundaryElapsed,
   };
 }
 
@@ -287,6 +305,10 @@ function updateConfirmationPanel() {
 
   confirmationDoneFood.textContent = `${confirmation.foodLabel} おしまい？`;
   confirmationNextFood.textContent = `つぎは ${confirmation.nextFoodLabel}`;
+}
+
+function updateExtensionPanel() {
+  extensionPanel.hidden = !state.activeExtension;
 }
 
 function setCompletion(isComplete) {
@@ -332,6 +354,7 @@ function updateVisuals() {
   setCompletion(elapsed >= total);
   startPauseButton.textContent = state.running ? "とめる" : elapsed >= total ? "もう一回" : "スタート";
   updateConfirmationPanel();
+  updateExtensionPanel();
 }
 
 function playPakuSound() {
@@ -382,6 +405,7 @@ function tick(timestamp) {
   if (crossedBoundary) {
     state.elapsed = crossedBoundary.boundaryElapsed;
     state.running = false;
+    clearActiveExtension();
     state.lastTick = 0;
     state.mouthTimer = 0;
     state.mouthOpen = true;
@@ -461,9 +485,22 @@ nextFoodButton.addEventListener("click", () => {
 extendFoodButton.addEventListener("click", () => {
   if (!state.pendingConfirmation) return;
 
+  startActiveExtension(state.pendingConfirmation);
   state.extraSeconds[state.pendingConfirmation.foodId] =
     (state.extraSeconds[state.pendingConfirmation.foodId] ?? 0) + 60;
   clearBoundaryConfirmation();
+  startTimer();
+});
+
+completeExtensionButton.addEventListener("click", () => {
+  const extension = state.activeExtension;
+  if (!extension) return;
+
+  const foodIndex = eatingOrder.findIndex((food) => food.id === extension.foodId);
+  if (foodIndex === -1) return;
+
+  state.elapsed = getFoodBoundary(foodIndex);
+  clearActiveExtension();
   startTimer();
 });
 
@@ -471,6 +508,7 @@ function resetTimer() {
   state.running = false;
   state.elapsed = 0;
   clearBoundaryConfirmation();
+  clearActiveExtension();
   clearExtraSeconds();
   state.lastTick = 0;
   state.mouthTimer = 0;

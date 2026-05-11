@@ -1350,6 +1350,7 @@ h1 span:nth-child(5) { color: #9d6218; }
 }
 
 .controls button,
+.extension-panel button,
 .confirmation-actions button,
 .settings select {
   border-radius: 999px;
@@ -1361,6 +1362,7 @@ h1 span:nth-child(5) { color: #9d6218; }
 }
 
 .controls button,
+.extension-panel button,
 .confirmation-actions button {
   min-width: 120px;
   min-height: 54px;
@@ -1369,6 +1371,7 @@ h1 span:nth-child(5) { color: #9d6218; }
 }
 
 .controls button:first-child,
+.extension-panel button,
 .confirmation-actions button:first-child {
   border-color: #f7a85a;
   background: linear-gradient(180deg, #fff4a6, #ffae34);
@@ -1382,6 +1385,22 @@ h1 span:nth-child(5) { color: #9d6218; }
 .controls button:disabled {
   cursor: default;
   opacity: 0.52;
+}
+
+.extension-panel {
+  position: absolute;
+  z-index: 8;
+  left: 50%;
+  bottom: 90px;
+  display: flex;
+  justify-content: center;
+  width: min(100% - 36px, 388px);
+  transform: translateX(-50%);
+}
+
+.extension-panel button {
+  min-width: 136px;
+  font-size: 24px;
 }
 
 .settings {
@@ -1599,6 +1618,10 @@ select:focus-visible {
   .controls button {
     min-width: 114px;
     font-size: 21px;
+  }
+
+  .extension-panel {
+    bottom: 86px;
   }
 
   .confirmation-panel {
@@ -1820,6 +1843,11 @@ select:focus-visible {
     font-size: 20px;
   }
 
+  .extension-panel {
+    bottom: 92px;
+    width: min(100% - 108px, 420px);
+  }
+
   .confirmation-panel {
     bottom: 96px;
     min-width: min(360px, calc(100% - 40px));
@@ -1981,6 +2009,11 @@ select:focus-visible {
   }
 
   .controls {
+    width: min(100% - 32px, 380px);
+  }
+
+  .extension-panel {
+    bottom: 116px;
     width: min(100% - 32px, 380px);
   }
 
